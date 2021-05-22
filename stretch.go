@@ -2,81 +2,70 @@ package main
 
 import (
 	"log"
+
+	"github.com/kchevelev/stretchbinarytree/data"
 )
 
-type TreeNode struct {
-	Val       int
-	LeftNode  *TreeNode
-	RightNode *TreeNode
-}
-
-func stretch(root *TreeNode, stretchAmount int) {
+func stretch(root *data.TreeNode, stretchAmount int) {
 	if stretchAmount <= 0 {
 		log.Fatalf("invalid stretchAmount value")
 	}
-	nodeType := "left"
+	nodeType := data.LeftNode
 	if root != nil {
 		keepStretching(root, stretchAmount, nodeType)
 	}
 }
 
-func keepStretching(node *TreeNode, stretchAmount int, nodeType string) {
-	// fmt.Printf("\ngot: %+v\n", node)
-
+func keepStretching(node *data.TreeNode, stretchAmount int, nodeType data.NodeType) {
 	// keep references for after injection
 	leftRef := node.LeftNode
 	rightRef := node.RightNode
 
-	// clear existing references on node being stretched
-	node.LeftNode = nil
-	node.RightNode = nil
-
 	// calculate stretched value
 	val := node.Val / stretchAmount
 
-	// fmt.Printf("updating current node value to %v\n", val)
 	// update value of node being stretched
 	node.Val = val
+	// clear existing references
+	node.LeftNode = nil
+	node.RightNode = nil
 
 	// stretch a node N times
 	for i := 1; i < stretchAmount; i++ {
 		switch nodeType {
-		case "left":
-			// fmt.Println("stretching left")
-			node.LeftNode = &TreeNode{
+		case data.LeftNode:
+			// stretching to the left
+			node.LeftNode = &data.TreeNode{
 				Val:       val,
 				LeftNode:  nil,
 				RightNode: nil,
 			}
-			// fmt.Printf("new left node: %+v\n", node.LeftNode)
+			// advancing to left node
 			node = node.LeftNode
-			// fmt.Printf("advancing to left node: %+v\n", node)
 
-		case "right":
-			// fmt.Println("stretching right")
-			node.RightNode = &TreeNode{
+		case data.RightNode:
+			// stretching to the right
+			node.RightNode = &data.TreeNode{
 				Val:       val,
 				LeftNode:  nil,
 				RightNode: nil,
 			}
-			// fmt.Printf("new right node: %+v\n", node.RightNode)
+			// advancing to right node
 			node = node.RightNode
-			// fmt.Printf("advancing to right node: %+v\n", node)
 		}
 	}
 
-	// restore references
+	// restore references on the last instance of stretched node
 	node.LeftNode = leftRef
 	node.RightNode = rightRef
-	// fmt.Printf("restoring original references: %+v\n", node)
 
 	if node.LeftNode != nil {
-		// fmt.Printf("processing left node: %+v\n", node.LeftNode)
-		keepStretching(node.LeftNode, stretchAmount, "left")
+		// recursively keep processing node to the left
+		keepStretching(node.LeftNode, stretchAmount, data.LeftNode)
 	}
 
 	if node.RightNode != nil {
-		// fmt.Printf("processing right node: %+v\n", node.RightNode)
-		keepStretching(node.RightNode, stretchAmount, "right")
+		// recursively keep processing node to the right
+		keepStretching(node.RightNode, stretchAmount, data.RightNode)
 	}
 }
