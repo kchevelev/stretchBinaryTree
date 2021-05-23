@@ -1,7 +1,5 @@
 package data
 
-var TreeSample TreeNode
-
 func GetSampleTree() TreeNode {
 	return TreeNode{
 		Val: 12,
